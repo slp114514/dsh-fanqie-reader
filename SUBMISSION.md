@@ -22,6 +22,14 @@ https://www.npmjs.com/package/dsh-fanqie-reader
 https://github.com/slp114514/dsh-fanqie-reader
 ```
 
+如果 npm 发布暂时被账号 2FA 卡住，可以先按固定 Git 提交申请收录：
+
+```text
+仓库：https://github.com/slp114514/dsh-fanqie-reader
+提交：d9920423ea1a4ef9c4d5242f89dc5ae86fb54cd2
+子目录：无（插件在仓库根目录）
+```
+
 ## 简短说明
 
 中文：
