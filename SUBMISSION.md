@@ -26,7 +26,7 @@ https://github.com/slp114514/dsh-fanqie-reader
 
 ```text
 仓库：https://github.com/slp114514/dsh-fanqie-reader
-提交：d9920423ea1a4ef9c4d5242f89dc5ae86fb54cd2
+提交：788dbee
 子目录：无（插件在仓库根目录）
 ```
 
