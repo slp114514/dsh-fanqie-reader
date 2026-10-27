@@ -15,11 +15,11 @@ import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
-const PLAYER = 'C:\\Program Files\\BlueStacks_nxt\\HD-Player.exe';
-const ADB = 'C:\\Program Files\\BlueStacks_nxt\\HD-Adb.exe';
+export const PLAYER = 'C:\\Program Files\\BlueStacks_nxt\\HD-Player.exe';
+export const ADB = 'C:\\Program Files\\BlueStacks_nxt\\HD-Adb.exe';
+export const INSTANCE = 'Nougat64';
+export const ADB_ADDRESS = '127.0.0.1:5555';
 const SCRIPT = path.join(HERE, 'bridge-hidden.ps1');
-const INSTANCE = 'Nougat64';
-const ADB_ADDRESS = '127.0.0.1:5555';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));

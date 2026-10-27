@@ -147,6 +147,34 @@ window.__ModuleLoader__.load({
         bridgeStop: '停止',
         bridgeRefresh: '刷新状态',
         bridgeError: '隐藏桥错误',
+        setupTitle: '高级组件安装',
+        setupHint: '一次点击 + 一次 Windows 管理员授权 + 一次可见登录。安装 BlueStacks 和番茄 APK；首次登录不隐藏。',
+        setupOneClick: '一键安装高级组件',
+        setupApkInstall: '只安装番茄 APK',
+        setupLogin: '打开可见登录',
+        setupStop: '关闭 BlueStacks',
+        setupRefresh: '刷新状态',
+        setupReady: '高级组件已就绪',
+        setupMissing: 'BlueStacks / APK 未就绪',
+        setupApkMissing: '缺少 fanqie.apk',
+        setupLog: '安装日志',
+        setupBusy: '正在安装，请勿关闭 DSH…',
+        setupNeedsLogin: '请在 BlueStacks 里登录番茄 App',
+        captureTitle: '稳定互动捕获',
+        captureHint:
+          '稳定发书评/回复需要一次高级捕获：本机 BlueStacks root + mitmproxy 系统证书。只记录番茄相关域名，只保存在本机，不上传。',
+        captureStart: '开始高级捕获',
+        captureStop: '停止并保存',
+        captureRefresh: '刷新捕获状态',
+        captureActive: '捕获中，请打开番茄 App 的书评页',
+        captureInactive: '未在捕获',
+        captureRootMissing: 'BlueStacks 没有 root',
+        captureCaMissing: '没有安装 mitmproxy 系统证书',
+        captureAuthReady: '已检测到 App 会话',
+        captureAuthMissing: '还没有 App 会话',
+        captureConsent: '这会改变 BlueStacks 的证书/网络设置，不是静默操作。',
+        captureImport: '保存捕获会话',
+        captureImported: 'App 会话已保存',
         cookieTitle: '番茄 Cookie（可选）',
         cookieHint:
           '只保存在本机 $DSH_HOME/fanqie-reader/state.json，只发送给 fanqienovel.com。设置后可能读到更多已购/有权限的章节；留空则清除。',
@@ -307,6 +335,34 @@ window.__ModuleLoader__.load({
         bridgeStop: 'Stop',
         bridgeRefresh: 'Refresh status',
         bridgeError: 'Bridge error',
+        setupTitle: 'Advanced setup',
+        setupHint: 'One click + one Windows UAC + one visible login. Installs BlueStacks and the Fanqie APK; first login stays visible.',
+        setupOneClick: 'Install advanced component',
+        setupApkInstall: 'Install APK only',
+        setupLogin: 'Open visible login',
+        setupStop: 'Close BlueStacks',
+        setupRefresh: 'Refresh',
+        setupReady: 'Advanced component ready',
+        setupMissing: 'BlueStacks / APK not ready',
+        setupApkMissing: 'fanqie.apk missing',
+        setupLog: 'Setup log',
+        setupBusy: 'Installing, keep DSH open…',
+        setupNeedsLogin: 'Sign in to Fanqie in BlueStacks',
+        captureTitle: 'Stable interaction capture',
+        captureHint:
+          'Stable reviews/replies need one explicit advanced capture: BlueStacks root + mitmproxy system certificate. Only Fanqie hosts are recorded locally and never uploaded.',
+        captureStart: 'Start advanced capture',
+        captureStop: 'Stop and save',
+        captureRefresh: 'Refresh capture status',
+        captureActive: 'Capturing; open a Fanqie review page',
+        captureInactive: 'Not capturing',
+        captureRootMissing: 'BlueStacks is not rooted',
+        captureCaMissing: 'mitmproxy system certificate is missing',
+        captureAuthReady: 'App session detected',
+        captureAuthMissing: 'No App session yet',
+        captureConsent: 'This changes BlueStacks certificate/network settings; it is not silent.',
+        captureImport: 'Save captured session',
+        captureImported: 'App session saved',
         cookieTitle: 'Fanqie cookie (optional)',
         cookieHint:
           'Stored only on this machine at $DSH_HOME/fanqie-reader/state.json and sent only to fanqienovel.com. It may unlock chapters your account can access. Leave empty to clear.',
@@ -448,6 +504,8 @@ window.__ModuleLoader__.load({
         timezone: 'Asia/Shanghai',
       });
       const [bridgeStatus, setBridgeStatus] = useState(null);
+      const [setupStatus, setSetupStatus] = useState(null);
+      const [captureStatus, setCaptureStatus] = useState(null);
       const [commentText, setCommentText] = useState('');
       const [commentScore, setCommentScore] = useState(10);
       const [replyId, setReplyId] = useState('');
@@ -472,6 +530,14 @@ window.__ModuleLoader__.load({
                 const bridge = await api('/bridge/status');
                 if (alive) setBridgeStatus(bridge);
               } catch { /* bridge is optional */ }
+              try {
+                const setup = await api('/setup/status');
+                if (alive) setSetupStatus(setup);
+              } catch { /* setup is optional */ }
+              try {
+                const capture = await api('/capture/status');
+                if (alive) setCaptureStatus(capture);
+              } catch { /* capture is optional */ }
             }
           } catch (err) {
             if (alive) setError(err instanceof Error ? err.message : String(err));
@@ -629,6 +695,90 @@ window.__ModuleLoader__.load({
           const payload = await api('/bridge/stop', { method: 'POST', body: {} });
           setBridgeStatus(payload);
           setToast(t('bridgeStopped'));
+        });
+      }
+
+      async function refreshSetup() {
+        try {
+          const payload = await api('/setup/status');
+          setSetupStatus(payload);
+          return payload;
+        } catch (err) {
+          setSetupStatus({ installed: false, error: err instanceof Error ? err.message : String(err) });
+          return null;
+        }
+      }
+
+      async function setupOneClick() {
+        await run('setup-one-click', async () => {
+          const payload = await api('/setup/one-click', { method: 'POST', body: {} });
+          setSetupStatus(payload);
+          if (payload.error) throw new Error(payload.error);
+          setToast(t('setupNeedsLogin'));
+          await refreshBridge();
+        });
+      }
+
+      async function setupInstallApk() {
+        await run('setup-apk', async () => {
+          const payload = await api('/setup/install-apk', { method: 'POST', body: {} });
+          setSetupStatus(payload);
+          if (payload.error) throw new Error(payload.error);
+          setToast(t('setupReady'));
+        });
+      }
+
+      async function setupLogin() {
+        await run('setup-login', async () => {
+          const payload = await api('/setup/login', { method: 'POST', body: {} });
+          setSetupStatus(payload);
+          if (payload.error) throw new Error(payload.error);
+          setToast(t('setupNeedsLogin'));
+        });
+      }
+
+      async function setupStop() {
+        await run('setup-stop', async () => {
+          const payload = await api('/setup/stop', { method: 'POST', body: {} });
+          setSetupStatus(payload);
+          setToast(t('bridgeStopped'));
+        });
+      }
+
+      async function refreshCapture() {
+        try {
+          const payload = await api('/capture/status');
+          setCaptureStatus(payload);
+          return payload;
+        } catch (err) {
+          setCaptureStatus({ error: err instanceof Error ? err.message : String(err) });
+          return null;
+        }
+      }
+
+      async function startCapture() {
+        await run('capture-start', async () => {
+          const payload = await api('/capture/start', { method: 'POST', body: {} });
+          setCaptureStatus(payload);
+          if (payload.error) throw new Error(payload.error);
+          setToast(t('captureActive'));
+        });
+      }
+
+      async function stopCapture() {
+        await run('capture-stop', async () => {
+          const payload = await api('/capture/stop', { method: 'POST', body: {} });
+          setCaptureStatus(payload);
+          setToast(t('captureInactive'));
+        });
+      }
+
+      async function importCapturedSession() {
+        await run('capture-import', async () => {
+          const payload = await api('/capture/import', { method: 'POST', body: {} });
+          setToast(t('captureImported'));
+          await refreshCapture();
+          await refreshInteraction();
         });
       }
 
@@ -1692,6 +1842,129 @@ window.__ModuleLoader__.load({
           h(
             'div',
             { className: 'fr-settings-card' },
+            h('h3', null, t('setupTitle')),
+            h('p', { className: 'fr-hint' }, t('setupHint')),
+            h(
+              'div',
+              { className: 'fr-account-state' },
+              setupStatus?.installed && setupStatus?.appInstalled
+                ? t('setupReady')
+                : t('setupMissing'),
+              setupStatus?.apkReady ? '' : ` · ${t('setupApkMissing')}`,
+            ),
+            setupStatus?.apkPath ? h('p', { className: 'fr-hint' }, `APK: ${setupStatus.apkPath}`) : null,
+            h(
+              'div',
+              { className: 'fr-interaction-row' },
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-primary-btn',
+                  onClick: setupOneClick,
+                  disabled: Boolean(busy) || Boolean(setupStatus?.installing) || !setupStatus?.apkReady,
+                },
+                setupStatus?.installing ? t('setupBusy') : t('setupOneClick'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: setupLogin,
+                  disabled: Boolean(busy) || Boolean(setupStatus?.installing) || !setupStatus?.installed,
+                },
+                t('setupLogin'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: setupStop,
+                  disabled: Boolean(busy),
+                },
+                t('setupStop'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: refreshSetup,
+                  disabled: Boolean(busy),
+                },
+                t('setupRefresh'),
+              ),
+            ),
+            setupStatus?.log ? h('pre', { className: 'fr-setup-log' }, setupStatus.log) : null,
+          ),
+          h(
+            'div',
+            { className: 'fr-settings-card' },
+            h('h3', null, t('captureTitle')),
+            h('p', { className: 'fr-hint' }, t('captureHint')),
+            h('p', { className: 'fr-hint' }, t('captureConsent')),
+            h(
+              'div',
+              { className: 'fr-account-state' },
+              captureStatus?.active ? t('captureActive') : t('captureInactive'),
+              captureStatus?.authReady ? ` · ${t('captureAuthReady')}` : ` · ${t('captureAuthMissing')}`,
+            ),
+            h(
+              'p',
+              { className: 'fr-hint' },
+              `${captureStatus?.root ? 'root OK' : t('captureRootMissing')} · ${captureStatus?.ca ? 'CA OK' : t('captureCaMissing')}${captureStatus?.captureBytes ? ` · ${captureStatus.captureBytes} bytes` : ''}`,
+            ),
+            captureStatus?.error ? h('p', { className: 'fr-hint' }, captureStatus.error) : null,
+            h(
+              'div',
+              { className: 'fr-interaction-row' },
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-primary-btn',
+                  onClick: startCapture,
+                  disabled: Boolean(busy) || Boolean(captureStatus?.active) || !captureStatus?.bridgeRunning || !captureStatus?.root || !captureStatus?.ca,
+                },
+                t('captureStart'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: stopCapture,
+                  disabled: Boolean(busy) || !captureStatus?.active,
+                },
+                t('captureStop'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: importCapturedSession,
+                  disabled: Boolean(busy) || Boolean(captureStatus?.active) || !captureStatus?.captureBytes,
+                },
+                t('captureImport'),
+              ),
+              h(
+                'button',
+                {
+                  type: 'button',
+                  className: 'fr-ghost-btn',
+                  onClick: refreshCapture,
+                  disabled: Boolean(busy),
+                },
+                t('captureRefresh'),
+              ),
+            ),
+          ),
+          h(
+            'div',
+            { className: 'fr-settings-card' },
             h('h3', null, t('cookieTitle')),
             h(
               'p',
@@ -2096,6 +2369,7 @@ const CSS = `
 .fr-time-input { padding: 6px 7px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 7px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font: inherit; font-size: 12px; }
 .fr-days-row { display: flex; gap: 5px; flex-wrap: wrap; }
 .fr-day-check { display: inline-flex; align-items: center; gap: 3px; padding: 4px 7px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 999px; color: var(--dsw-alias-label-secondary); font-size: 11px; cursor: pointer; }
+.fr-setup-log { max-height: 120px; overflow: auto; margin: 8px 0 0; padding: 8px; border: 1px solid var(--dsw-alias-border-l1); border-radius: 7px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-secondary); font-size: 10px; white-space: pre-wrap; }
 .fr-field-label { margin-top: 6px; color: var(--dsw-alias-label-secondary); font-size: 11px; font-weight: 600; }
 .fr-interaction-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .fr-score-select { padding: 7px 8px; border: 1px solid var(--dsw-alias-border-l2); border-radius: 8px; background: var(--dsw-alias-bg-base); color: var(--dsw-alias-label-primary); font: inherit; font-size: 12px; }

@@ -26,6 +26,9 @@ import {
 } from './fanqie.js';
 import { createFanqieApp } from './fanqie-app.js';
 import { createBridge, isWithinSchedule } from './bridge.js';
+import { createSetup } from './setup.js';
+import { createCapture } from './capture.js';
+import { importCapture } from './capture-import.js';
 import { isTrustedRequest } from './trust.js';
 import {
   fetchAccount,
@@ -438,6 +441,8 @@ export function apply(ctx) {
   }
 
   const hiddenBridge = createBridge({ getSchedule: () => state.runtimeSchedule });
+  const setup = createSetup({ bridge: hiddenBridge });
+  const capture = createCapture({ bridge: hiddenBridge });
   hiddenBridge.startScheduler();
   ctx.effect(() => () => hiddenBridge.dispose());
 
@@ -1271,6 +1276,59 @@ export function apply(ctx) {
               'content-length': png.length,
             });
             res.end(png);
+            return;
+          }
+
+          if (req.method === 'GET' && url.pathname === `${PREFIX}/api/setup/status`) {
+            sendJson(res, 200, { ok: true, ...(await setup.status()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/setup/install-bluestacks`) {
+            sendJson(res, 200, { ok: true, ...(await setup.installBlueStacks()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/setup/one-click`) {
+            sendJson(res, 200, { ok: true, ...(await setup.oneClick()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/setup/install-apk`) {
+            sendJson(res, 200, { ok: true, ...(await setup.installApk()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/setup/login`) {
+            sendJson(res, 200, { ok: true, ...(await setup.launchVisible()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/setup/stop`) {
+            sendJson(res, 200, { ok: true, ...(await setup.stopVisible()) });
+            return;
+          }
+
+          if (req.method === 'GET' && url.pathname === `${PREFIX}/api/capture/status`) {
+            sendJson(res, 200, { ok: true, ...(await capture.status()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/capture/start`) {
+            sendJson(res, 200, { ok: true, ...(await capture.start()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/capture/stop`) {
+            sendJson(res, 200, { ok: true, ...(await capture.stop()) });
+            return;
+          }
+
+          if (req.method === 'POST' && url.pathname === `${PREFIX}/api/capture/import`) {
+            const captureState = await capture.status();
+            const result = importCapture(captureState.captureFile, { write: true });
+            appBridge = null;
+            sendJson(res, 200, { ok: true, ...result });
             return;
           }
 
