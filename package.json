@@ -1,0 +1,66 @@
+{
+  "name": "dsh-fanqie-reader",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "番茄书虫：左侧栏番茄小说阅读器，可把 DeepSeek 的共读工具限定在一个指定会话里。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "fanqie",
+    "novel",
+    "reader"
+  ],
+  "license": "MIT",
+  "author": "slp114514",
+  "homepage": "https://github.com/slp114514/dsh-fanqie-reader#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/slp114514/dsh-fanqie-reader.git"
+  },
+  "bugs": {
+    "url": "https://github.com/slp114514/dsh-fanqie-reader/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "index.js",
+  "icon": "./icon.svg",
+  "exports": {
+    ".": "./index.js",
+    "./client": "./client.js",
+    "./package.json": "./package.json",
+    "./icon": "./icon.svg",
+    "./locale/*.json": "./locale/*.json"
+  },
+  "files": [
+    "index.js",
+    "client.js",
+    "fanqie.js",
+    "fanqie-app.js",
+    "bridge.js",
+    "bridge-hidden.ps1",
+    "fanqie-font.js",
+    "auth.js",
+    "trust.js",
+    "cordis.patch.yml",
+    "icon.svg",
+    "locale/*.json",
+    "README.md",
+    "LICENSE",
+    "NOTICE.md"
+  ],
+  "engines": {
+    "dsh": ">=0.1.5-rc.1",
+    "node": ">=20"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  }
+}

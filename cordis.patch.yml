@@ -1,0 +1,4 @@
+- insert:
+    - id: fanqie-reader
+      name: dsh-fanqie-reader
+      config: {}

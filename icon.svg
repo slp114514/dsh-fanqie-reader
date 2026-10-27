@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="番茄书虫">
+  <defs>
+    <linearGradient id="fr-tomato" x1="18" y1="12" x2="48" y2="52" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FF7A59"/>
+      <stop offset="1" stop-color="#E83E2E"/>
+    </linearGradient>
+  </defs>
+  <path d="M32 14c11 0 19 8 19 19 0 12-8 20-19 20S13 45 13 33c0-11 8-19 19-19Z" fill="url(#fr-tomato)"/>
+  <path d="M32 15c-2-5-7-7-12-6 2 4 5 6 9 7l3-1Zm0 0c2-5 7-7 12-6-2 4-5 6-9 7l-3-1Z" fill="#2FA36B"/>
+  <path d="M24 28c2-2 5-3 8-3s6 1 8 3c1 1 1 2 0 3-2 1-4 2-8 2s-6-1-8-2c-1-1-1-2 0-3Z" fill="#FFF8EE"/>
+  <path d="M24 35c2-1 4-2 8-2s6 1 8 2M24 41c2-1 4-1 8-1s6 0 8 1" stroke="#FFF8EE" stroke-width="2.4" stroke-linecap="round" fill="none"/>
+  <circle cx="43" cy="18" r="3" fill="#FFD166"/>
+</svg>

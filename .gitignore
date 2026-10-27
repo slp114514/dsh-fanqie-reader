@@ -1,0 +1,11 @@
+node_modules/
+ref/
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+.env
+.env.*
+state.json
+device-auth.json
+*.suroot.json
