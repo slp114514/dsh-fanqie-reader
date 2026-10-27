@@ -9,3 +9,6 @@ Thumbs.db
 state.json
 device-auth.json
 *.suroot.json
+
+__pycache__/
+*.pyc
